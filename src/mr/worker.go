@@ -1,25 +1,22 @@
 package mr
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"io/ioutil"
+	"log"
+	"net/rpc"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"time"
 )
-import "log"
-import "net/rpc"
-import "hash/fnv"
 
-type ByKey []KeyValue
+var nReduce int
 
-// for sorting by key.
-func (a ByKey) Len() int           { return len(a) }
-func (a ByKey) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByKey) Less(i, j int) bool { return a[i].Key < a[j].Key }
+const TaskInterval = 200
 
 // Map functions return a slice of KeyValue.
 type KeyValue struct {
@@ -39,212 +36,180 @@ func ihash(key string) int {
 func Worker(mapf func(string, string) []KeyValue,
 	reducef func(string, []string) string) {
 
-	// uncomment to send the Example RPC to the coordinator.
-	//CallExample()
-
-	// TODO: Your worker implementation here.
-	for {
-		args := TaskArgs{}
-		reply := TaskReply{}
-
-		ok := call("Coordinator.RequestTask", &args, &reply)
-
-		if ok {
-			switch reply.TaskType {
-			case 0:
-				return
-
-				// Map task
-			case 1:
-				doMap(mapf, reply.FileName, reply.NReduce)
-
-				completionArgs := CompletionArgs{FileName: reply.FileName, TaskType: reply.TaskType}
-				completionReply := CompletionReply{}
-				call("Coordinator.NotifyCompletion", &completionArgs, &completionReply)
-
-				// Reduce task
-			case 2:
-				doReduce(reducef, reply.ReduceJobId)
-
-				completionArgs := CompletionArgs{ReduceJobId: reply.ReduceJobId, TaskType: reply.TaskType}
-				completionReply := CompletionReply{}
-				call("Coordinator.NotifyCompletion", &completionArgs, &completionReply)
-
-			}
-		} else {
-			fmt.Printf("call failed!\n")
-			time.Sleep(10 * time.Second)
-		}
+	// Your worker implementation here.
+	n, succ := getReduceCount()
+	if succ == false {
+		fmt.Println("Failed to get reduce task count, worker exiting.")
+		return
 	}
+	nReduce = n
 
+	for {
+		reply, succ := requestTask()
+
+		if succ == false {
+			fmt.Println("Failed to contact master, worker exiting.")
+			return
+		}
+		if reply.TaskType == ExitTask {
+			fmt.Println("All tasks are done, worker exiting.")
+			return
+		}
+
+		exit, succ := false, true
+		if reply.TaskType == NoTask {
+			// the entire mr job not done, but all
+			// map or reduce tasks are executing
+		} else if reply.TaskType == MapTask {
+			doMap(mapf, reply.TaskFile, reply.TaskId)
+			exit, succ = reportTaskDone(MapTask, reply.TaskId)
+		} else if reply.TaskType == ReduceTask {
+			doReduce(reducef, reply.TaskId)
+			exit, succ = reportTaskDone(ReduceTask, reply.TaskId)
+		}
+
+		if exit || !succ {
+			fmt.Println("Coordinator exited or all tasks done, worker exiting.")
+			return
+		}
+
+		time.Sleep(time.Millisecond * TaskInterval)
+	}
 }
 
-func doMap(mapf func(string, string) []KeyValue, filename string, nReduce int) {
-	fmt.Printf("Start to process file %s\n", filename)
-	// Open and read the file content.
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatalf("cannot open %v", filename)
-	}
+func doMap(mapf func(string, string) []KeyValue, filePath string, mapId int) {
+	file, err := os.Open(filePath)
+	checkError(err, "Cannot open file %v\n", filePath)
+
 	content, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatalf("cannot read %v", filename)
-	}
+	checkError(err, "Cannot read file %v\n", filePath)
 	file.Close()
 
-	// Apply the map function.
-	kva := mapf(filename, string(content))
+	kva := mapf(filePath, string(content))
+	writeMapOutput(kva, mapId)
+}
 
-	// Create a directory named "intermediate_files" in the current working directory.
-	intermediateDir := "intermediate_files"
-	err = os.MkdirAll(intermediateDir, os.ModePerm)
-	if err != nil {
-		log.Fatalf("cannot create directory: %v", intermediateDir)
-	}
+func writeMapOutput(kva []KeyValue, mapId int) {
+	// use io buffers to reduce disk I/O, which greatly improves
+	// performance when running in containers with mounted volumes
+	prefix := fmt.Sprintf("%v/mr-%v", TempDir, mapId)
+	files := make([]*os.File, 0, nReduce)
+	buffers := make([]*bufio.Writer, 0, nReduce)
+	encoders := make([]*json.Encoder, 0, nReduce)
 
-	// Create pendingFilesToMap for intermediate output based on ihash % nReduce.
-	intermediateFiles := make([]*os.File, nReduce)
-	encoders := make([]*json.Encoder, nReduce)
-
-	// Create pendingFilesToMap and encoders.
+	// create temp files, use pid to uniquely identify this worker. File format: tmp/mr-<map_task_id>-<reduce_hash>-<process_id>
 	for i := 0; i < nReduce; i++ {
-		intermediateFilename := filepath.Join(intermediateDir, fmt.Sprintf("mr-%s-%d", filepath.Base(filename), i))
-		intermediateFiles[i], err = os.Create(intermediateFilename)
-		if err != nil {
-			log.Fatalf("cannot create %v", intermediateFilename)
-		}
-		encoders[i] = json.NewEncoder(intermediateFiles[i])
+		filePath := fmt.Sprintf("%v-%v-%v", prefix, i, os.Getpid())
+		file, err := os.Create(filePath)
+		checkError(err, "Cannot create file %v\n", filePath)
+		buf := bufio.NewWriter(file)
+		files = append(files, file)
+		buffers = append(buffers, buf)
+		encoders = append(encoders, json.NewEncoder(buf))
 	}
 
-	// Distribute key-value pairs across the pendingFilesToMap.
+	// write map outputs to temp files
 	for _, kv := range kva {
-		index := ihash(kv.Key) % nReduce
-		err := encoders[index].Encode(&kv)
-		if err != nil {
-			log.Fatalf("cannot encode %v", kv)
-		}
+		idx := ihash(kv.Key) % nReduce
+		err := encoders[idx].Encode(&kv)
+		checkError(err, "Cannot encode %v to file\n", kv)
 	}
 
-	// Close all intermediate pendingFilesToMap.
-	for _, file := range intermediateFiles {
+	// flush file buffer to disk
+	for i, buf := range buffers {
+		err := buf.Flush()
+		checkError(err, "Cannot flush buffer for file: %v\n", files[i].Name())
+	}
+
+	// atomically rename temp files to ensure no one observes partial files
+	for i, file := range files {
 		file.Close()
+		newPath := fmt.Sprintf("%v-%v", prefix, i)
+		err := os.Rename(file.Name(), newPath)
+		checkError(err, "Cannot rename file %v\n", file.Name())
 	}
 }
 
-func doReduce(reducef func(string, []string) string, id int) {
-	intermediate := []KeyValue{}
-
-	// Compile the regex to match filenames with the pattern "mr-<any string>-<id>"
-	pattern := fmt.Sprintf("mr-.*-%d", id)
-	re := regexp.MustCompile(pattern)
-
-	// Iterate over all files in the "intermediate_files" directory
-	files, err := ioutil.ReadDir("intermediate_files")
+func doReduce(reducef func(string, []string) string, reduceId int) {
+	files, err := filepath.Glob(fmt.Sprintf("%v/mr-%v-%v", TempDir, "*", reduceId))
 	if err != nil {
-		log.Fatalf("cannot read intermediate_files directory: %v", err)
+		checkError(err, "Cannot list reduce files")
 	}
 
-	for _, file := range files {
-		if re.MatchString(file.Name()) {
-			// Open the file and decode its key-value pairs
-			filePath := filepath.Join("intermediate_files", file.Name())
-			f, err := os.Open(filePath)
-			if err != nil {
-				log.Fatalf("cannot open %v", filePath)
-			}
-			dec := json.NewDecoder(f)
-			for {
-				var kv KeyValue
-				if err := dec.Decode(&kv); err != nil {
-					break
-				}
-				intermediate = append(intermediate, kv)
-			}
-			f.Close()
+	kvMap := make(map[string][]string)
+	var kv KeyValue
+
+	for _, filePath := range files {
+		file, err := os.Open(filePath)
+		checkError(err, "Cannot open file %v\n", filePath)
+
+		dec := json.NewDecoder(file)
+		for dec.More() {
+			err = dec.Decode(&kv)
+			checkError(err, "Cannot decode from file %v\n", filePath)
+			kvMap[kv.Key] = append(kvMap[kv.Key], kv.Value)
 		}
 	}
 
-	// Sort the intermediate key-value pairs by key
-	sort.Sort(ByKey(intermediate))
-
-	// Prepare the output file
-	oname := fmt.Sprintf("mr-out-%d", id)
-	ofile, err := os.Create(oname)
-	if err != nil {
-		log.Fatalf("cannot create output file %v: %v", oname, err)
-	}
-
-	// Perform the reduce operation on each unique key
-	i := 0
-	for i < len(intermediate) {
-		j := i + 1
-		for j < len(intermediate) && intermediate[j].Key == intermediate[i].Key {
-			j++
-		}
-		values := []string{}
-		for k := i; k < j; k++ {
-			values = append(values, intermediate[k].Value)
-		}
-		output := reducef(intermediate[i].Key, values)
-
-		// Write the reduce output to the file
-		fmt.Fprintf(ofile, "%v %v\n", intermediate[i].Key, output)
-
-		i = j
-	}
-
-	// Close the output file
-	ofile.Close()
+	writeReduceOutput(reducef, kvMap, reduceId)
 }
 
-// readIntermediateFile reads the key-value pairs from the specified intermediate file.
-func readIntermediateFile(filename string) []KeyValue {
-	var kva []KeyValue
+func writeReduceOutput(reducef func(string, []string) string,
+	kvMap map[string][]string, reduceId int) {
 
-	// Open the file.
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatalf("cannot open %v", filename)
+	// sort the kv map by key
+	keys := make([]string, 0, len(kvMap))
+	for k := range kvMap {
+		keys = append(keys, k)
 	}
-	defer file.Close()
+	sort.Strings(keys)
 
-	// Decode the JSON objects from the file.
-	dec := json.NewDecoder(file)
-	for {
-		var kv KeyValue
-		if err := dec.Decode(&kv); err != nil {
-			break
-		}
-		kva = append(kva, kv)
+	// Create temp file
+	filePath := fmt.Sprintf("%v/mr-out-%v-%v", TempDir, reduceId, os.Getpid())
+	file, err := os.Create(filePath)
+	checkError(err, "Cannot create file %v\n", filePath)
+
+	// Call reduce and write to temp file
+	for _, k := range keys {
+		v := reducef(k, kvMap[k])
+		_, err := fmt.Fprintf(file, "%v %v\n", k, reducef(k, kvMap[k]))
+		checkError(err, "Cannot write mr output (%v, %v) to file", k, v)
 	}
 
-	return kva
+	// atomically rename temp files to ensure no one observes partial files
+	file.Close()
+	newPath := fmt.Sprintf("mr-out-%v", reduceId)
+	err = os.Rename(filePath, newPath)
+	checkError(err, "Cannot rename file %v\n", filePath)
 }
 
-// example function to show how to make an RPC call to the coordinator.
-//
-// the RPC argument and reply types are defined in rpc.go.
-func CallExample() {
+func getReduceCount() (int, bool) {
+	args := GetReduceCountArgs{}
+	reply := GetReduceCountReply{}
+	succ := call("Coordinator.GetReduceCount", &args, &reply)
 
-	// declare an argument structure.
-	args := ExampleArgs{}
+	return reply.ReduceCount, succ
+}
 
-	// fill in the argument(s).
-	args.X = 99
+func requestTask() (*RequestTaskReply, bool) {
+	args := RequestTaskArgs{os.Getpid()}
+	reply := RequestTaskReply{}
+	succ := call("Coordinator.RequestTask", &args, &reply)
 
-	// declare a reply structure.
-	reply := ExampleReply{}
+	return &reply, succ
+}
 
-	// send the RPC request, wait for the reply.
-	// the "Coordinator.Example" tells the
-	// receiving server that we'd like to call
-	// the Example() method of struct Coordinator.
-	ok := call("Coordinator.Example", &args, &reply)
-	if ok {
-		// reply.Y should be 100.
-		fmt.Printf("reply.Y %v\n", reply.Y)
-	} else {
-		fmt.Printf("call failed!\n")
+func reportTaskDone(taskType TaskType, taskId int) (bool, bool) {
+	args := ReportTaskArgs{os.Getpid(), taskType, taskId}
+	reply := ReportTaskReply{}
+	succ := call("Coordinator.ReportTaskDone", &args, &reply)
+
+	return reply.CanExit, succ
+}
+
+func checkError(err error, format string, v ...interface{}) {
+	if err != nil {
+		log.Fatalf(format, v)
 	}
 }
 

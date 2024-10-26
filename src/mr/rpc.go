@@ -9,42 +9,39 @@ package mr
 import "os"
 import "strconv"
 
-//
 // example to show how to declare the arguments
 // and reply for an RPC.
-//
-
-type ExampleArgs struct {
-	X int
+type GetReduceCountArgs struct {
 }
 
-type ExampleReply struct {
-	Y int
+type GetReduceCountReply struct {
+	ReduceCount int
+}
+
+type RequestTaskArgs struct {
+	WorkerId int
+}
+
+type RequestTaskReply struct {
+	TaskType TaskType
+	TaskId   int
+	TaskFile string
+}
+
+type ReportTaskArgs struct {
+	WorkerId int
+	TaskType TaskType
+	TaskId   int
+}
+
+type ReportTaskReply struct {
+	CanExit bool
 }
 
 // Add your RPC definitions here.
-type TaskArgs struct {
-}
-
-type TaskReply struct {
-	FileName    string
-	TaskType    int // 1: Map, 2: Reduce
-	NReduce     int
-	ReduceJobId int
-}
-
-type CompletionArgs struct {
-	FileName    string
-	TaskType    int
-	ReduceJobId int
-}
-
-type CompletionReply struct {
-	Ack int
-}
 
 // Cook up a unique-ish UNIX-domain socket name
-// in /var/tmp, for the coordinator.
+// in /var/tmp, for the master.
 // Can't use the current directory since
 // Athena AFS doesn't support UNIX-domain sockets.
 func coordinatorSock() string {
