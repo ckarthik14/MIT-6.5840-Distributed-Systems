@@ -70,7 +70,7 @@ func (cfg *config) makeClient() *Clerk {
 	end := cfg.net.MakeEnd(endname)
 	cfg.net.Connect(endname, SERVERID)
 
-	ck := MakeClerk(end)
+	ck := MakeClerk(end, cfg.nextClientId)
 	cfg.clerks[ck] = endname
 	cfg.nextClientId++
 	cfg.ConnectClientUnlocked(ck)
