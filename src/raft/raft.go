@@ -191,46 +191,52 @@ func (rf *Raft) AppendEntry(args *AppendEntryArgs, reply *AppendEntryReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
-	fmt.Printf("Got heartbeat at %d from %d\n", rf.me, args.LeaderId)
-
 	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
+		rf.status = FOLLOWER
+		rf.votedFor = -1
 	}
 
-	rf.status = FOLLOWER
+	// Reset the election timeout timer
 	rf.lastAppendEntry = time.Now()
+
+	reply.Term = rf.currentTerm
+	reply.Success = true
 }
 
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
+	fmt.Printf("Request vote at server %d\n", rf.me)
+
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+
+	fmt.Printf("Enter lock at server %d\n", rf.me)
 
 	//fmt.Printf("Enter request vote at server %d\n", rf.me)
 	// If the candidate's Term is less than the current Term, reject the request
 	if args.Term < rf.currentTerm {
-		//fmt.Printf("Low term arrived at server %d\n", rf.me)
+		fmt.Printf("Low term arrived at server %d\n", rf.me)
 		reply.VoteGranted = false
+		reply.Term = rf.currentTerm
 		return
 	}
 
 	// If the candidate's Term is higher, update currentTerm and reset votedFor
 	if args.Term > rf.currentTerm {
-		//fmt.Printf("Update term at server %d\n", rf.me)
+		fmt.Printf("Update term at server %d\n", rf.me)
 		rf.currentTerm = args.Term
 		rf.votedFor = -1
 	}
 
 	// Check if this server has already voted for someone else in the current Term
 	if rf.votedFor == -1 || rf.votedFor == args.CandidateId {
-		//fmt.Printf("Not voted for anyone, fresh to cast vote at server %d\n", rf.me)
-		//fmt.Printf("Args arrived at server %d: %+v\n", rf.me, args)
-		//fmt.Printf("Last log term %d, Last log index %d at server %d\n", rf.getLastLogTerm(), rf.getLastLogIndex(), rf.me)
+		fmt.Printf("Server %d might be able to vote for term %d\n", rf.me, rf.currentTerm)
 		// Check if the candidate's log is at least as up-to-date as this server's log
 		if args.LastLogTerm > rf.getLastLogTerm() ||
 			(args.LastLogTerm == rf.getLastLogTerm() && args.LastLogIndex >= rf.getLastLogIndex()) {
 
 			// Grant the vote and set votedFor to the candidate
-			//fmt.Printf("Server %d granted vote for candidate %d\n", rf.me, rf.votedFor)
+			fmt.Printf("Server %d granted vote for candidate %d\n", rf.me, args.CandidateId)
 			rf.votedFor = args.CandidateId
 			reply.VoteGranted = true
 			return
@@ -320,7 +326,6 @@ func (rf *Raft) ticker() {
 		// Check if a leader election should be started. If it has been ~500ms since last append entry, start election
 		if rf.status != LEADER && rf.noHeartbeatForAWhile() {
 			// start election
-			fmt.Printf("Started Election at server %d\n", rf.me)
 
 			rf.mu.Lock()
 
@@ -336,6 +341,8 @@ func (rf *Raft) ticker() {
 
 			rf.mu.Unlock()
 
+			fmt.Printf("Started Election at server %d with term: %d\n", rf.me, rf.currentTerm)
+
 			for idx := range rf.peers {
 				if idx == rf.me {
 					continue
@@ -349,29 +356,41 @@ func (rf *Raft) ticker() {
 				args.Term = term
 				args.CandidateId = candidateId
 
+				fmt.Printf("Server %d requested vote from server %d\n", rf.me, idx)
 				ok := rf.sendRequestVote(idx, &args, &reply)
+				fmt.Printf("Server %d requested vote from server %d and got %t\n", rf.me, idx, reply.VoteGranted)
 
-				if ok && reply.VoteGranted {
-					votesGathered++
+				if ok {
+					rf.mu.Lock()
+					if rf.currentTerm < reply.Term {
+						rf.currentTerm = reply.Term
+						break
+					}
+					rf.mu.Unlock()
+					if reply.VoteGranted {
+						fmt.Printf("Got vote at server %d from %d\n", rf.me, idx)
+						votesGathered++
+					}
 				}
 			}
 
 			if votesGathered > (rf.n / 2) {
 				rf.status = LEADER
+				fmt.Printf("Leader: %d, Term: %d\n", rf.me, rf.currentTerm)
 			}
 
 		}
 
-		// pause for a random amount of time between 50 and 350
+		// pause for a random amount of time between 200 and 400
 		// milliseconds.
-		ms := 50 + (rand.Int63() % 300)
+		ms := 300 + (rand.Int63() % 200)
 		time.Sleep(time.Duration(ms) * time.Millisecond)
 
 	}
 }
 
 func (rf *Raft) noHeartbeatForAWhile() bool {
-	return rf.lastAppendEntry.Add(750 * time.Millisecond).Before(time.Now())
+	return rf.lastAppendEntry.Add(600 * time.Millisecond).Before(time.Now())
 }
 
 func (rf *Raft) sendHeartbeat() {
@@ -391,7 +410,6 @@ func (rf *Raft) sendHeartbeat() {
 			}
 		}
 
-		// Tester allows maximum 10 heartbeats per second
 		ms := 100
 		time.Sleep(time.Duration(ms) * time.Millisecond)
 	}
