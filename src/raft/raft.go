@@ -136,7 +136,6 @@ func (rf *Raft) resetTimer() {
 	rf.mu.Lock()
 	interval := ELECTION_TIMEOUT_MIN + rand.Intn(ELECTION_TIMEOUT_MAX-ELECTION_TIMEOUT_MIN)
 	rf.electionTimeout = time.Duration(interval) * time.Millisecond
-	rf.lastHeard = time.Now()
 	rf.mu.Unlock()
 }
 
@@ -145,6 +144,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	DPrintf("Got vote request at server %d from %d\n", rf.me, args.CandidateId)
 	// Your code here (3A, 3B).
 	rf.mu.Lock()
+	defer rf.mu.Unlock()
 
 	DPrintf("Enter request vote lock at server %d from %d\n", rf.me, args.CandidateId)
 
@@ -152,7 +152,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		reply.Term = rf.currentTerm
 		reply.VoteGranted = false
 		DPrintf("Candidate has lower term %d at server %d\n", args.CandidateId, rf.me)
-		rf.mu.Unlock()
 		return
 	}
 	// follow the second rule in "Rules for Servers" in figure 2 before handling an incoming RPC
@@ -170,7 +169,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// deny vote if already voted
 	if rf.votedFor != -1 {
 		reply.VoteGranted = false
-		rf.mu.Unlock()
 		return
 	}
 	// deny vote if consistency check fails (candidate is less up-to-date)
@@ -179,15 +177,12 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	if args.LastLogTerm < lastLogTerm || (args.LastLogTerm == lastLogTerm && args.LastLogIndex < lastLogIndex) {
 		reply.VoteGranted = false
-		rf.mu.Unlock()
 		return
 	}
 	DPrintf("Server %d granted vote to candidate %d\n", rf.me, args.CandidateId)
 	// now this peer must vote for the candidate
 	rf.votedFor = args.CandidateId
-	rf.mu.Unlock()
-
-	rf.resetTimer()
+	rf.electionTimeout = ElectionTimeout()
 }
 
 // SendRequestVote sends a RequestVote RPC to a server.
@@ -340,7 +335,7 @@ func (rf *Raft) startElection() {
 						rf.lastHeartbeat = time.Now()
 						return
 					}
-					// in case candidate became a follower while looking for votes
+					// in case candidate became a follower/leader while looking for votes
 					if rf.state != CANDIDATE || rf.currentTerm != args.Term {
 						return
 					}
