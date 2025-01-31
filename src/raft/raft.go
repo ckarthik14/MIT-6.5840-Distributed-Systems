@@ -40,7 +40,6 @@ const (
 )
 
 const (
-	HEARTBEAT            = 200 * time.Millisecond
 	ELECTION_TIMEOUT_MIN = 300
 	ELECTION_TIMEOUT_MAX = 500
 )
@@ -130,13 +129,6 @@ type AppendEntriesArgs struct {
 type AppendEntriesReply struct {
 	Term    int  // CurrentTerm, for leader to update itself
 	Success bool // True if follower accepts the append
-}
-
-func (rf *Raft) resetTimer() {
-	rf.mu.Lock()
-	interval := ELECTION_TIMEOUT_MIN + rand.Intn(ELECTION_TIMEOUT_MAX-ELECTION_TIMEOUT_MIN)
-	rf.electionTimeout = time.Duration(interval) * time.Millisecond
-	rf.mu.Unlock()
 }
 
 // RequestVote RPC handler.
@@ -294,12 +286,13 @@ func (rf *Raft) ticker() {
 			continue
 		}
 
+		// not a leader
 		if time.Since(rf.lastHeartbeat) >= rf.electionTimeout {
 			rf.startElection()
 		}
 		rf.mu.Unlock()
 
-		// pause for a random amount of time between 150 and 450
+		// pause for a random amount of time between 50 and 350
 		// milliseconds.
 		ms := 50 + (rand.Int63() % 300)
 		time.Sleep(time.Duration(ms) * time.Millisecond)
@@ -335,8 +328,8 @@ func (rf *Raft) startElection() {
 						rf.lastHeartbeat = time.Now()
 						return
 					}
-					// in case candidate became a follower/leader while looking for votes
-					if rf.state != CANDIDATE || rf.currentTerm != args.Term {
+					// in case candidate has lost candidacy while looking for votes or current term got updated
+					if rf.state != CANDIDATE {
 						return
 					}
 					if reply.VoteGranted {
