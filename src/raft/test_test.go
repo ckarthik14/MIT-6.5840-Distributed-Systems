@@ -59,8 +59,6 @@ func TestReElection3A(t *testing.T) {
 
 	leader1 := cfg.checkOneLeader()
 
-	fmt.Printf("leader1: %v\n", leader1)
-
 	// if the leader disconnects, a new one should be elected.
 	cfg.disconnect(leader1)
 	cfg.checkOneLeader()

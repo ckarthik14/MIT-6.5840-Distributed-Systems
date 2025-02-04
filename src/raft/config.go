@@ -143,7 +143,7 @@ func (cfg *config) checkLogs(i int, m ApplyMsg) (string, bool) {
 	for j := 0; j < len(cfg.logs); j++ {
 		if old, oldok := cfg.logs[j][m.CommandIndex]; oldok && old != v {
 			log.Printf("%v: log %v; server %v\n", i, cfg.logs[i], cfg.logs[j])
-			// some server has already committed a different value for this entry!
+			// some server has already committed a different value for this Entry!
 			err_msg = fmt.Sprintf("commit index=%v server=%v %v != server=%v %v",
 				m.CommandIndex, i, m.Command, j, old)
 		}
@@ -485,7 +485,7 @@ func (cfg *config) checkNoLeader() {
 	}
 }
 
-// how many servers think a log entry is committed?
+// how many servers think a log Entry is committed?
 func (cfg *config) nCommitted(index int) (int, interface{}) {
 	count := 0
 	var cmd interface{} = nil
@@ -569,6 +569,7 @@ func (cfg *config) one(cmd interface{}, expectedServers int, retry bool) int {
 			cfg.mu.Unlock()
 			if rf != nil {
 				index1, _, ok := rf.Start(cmd)
+				DPrintf("si: %d, index1: %d, isLeader: %v", si, index1, ok)
 				if ok {
 					index = index1
 					break
