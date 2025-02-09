@@ -141,6 +141,10 @@ type AppendEntriesArgs struct {
 type AppendEntriesReply struct {
 	Term    int  // CurrentTerm, for leader to update itself
 	Success bool // True if follower accepts the append
+
+	XTerm  int
+	XIndex int
+	XLen   int
 }
 
 // RequestVote RPC handler.
@@ -236,6 +240,11 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		DPrintf("No matching term at server %d\n", rf.me)
 		DPrintf("last log index: %d, args prev log index: %d\n", rf.getLastLogIndex(), args.PrevLogIndex)
 		reply.Success = false
+
+		// reducing RPC count
+		reply.XTerm = -1
+		reply.XIndex = -1
+		reply.XLen = len(rf.log)
 		return
 	}
 
@@ -243,6 +252,20 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if rf.log[args.PrevLogIndex].Term != args.PrevLogTerm {
 		DPrintf("Mismatch term %d != %d, prevLogIndex: %d at server %d\n", rf.log[args.PrevLogIndex].Term, args.PrevLogTerm, args.PrevLogIndex, rf.me)
 		reply.Success = false
+
+		// reducing RPC count
+		reply.XTerm = rf.log[args.PrevLogIndex].Term
+		xIndex := args.PrevLogIndex
+
+		for {
+			if rf.log[xIndex].Term != reply.XTerm {
+				break
+			}
+			xIndex--
+		}
+
+		reply.XIndex = xIndex + 1
+
 		return
 	}
 
@@ -354,7 +377,11 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 							break
 						} else {
 							if term >= reply.Term {
-								nextIndex[peer]--
+								if reply.XTerm == -1 {
+									nextIndex[peer] = reply.XLen
+								} else {
+									nextIndex[peer] = reply.XIndex
+								}
 								rf.mu.Unlock()
 							} else {
 								rf.currentTerm = reply.Term
@@ -395,7 +422,7 @@ func ElectionTimeout() time.Duration {
 
 // HeartbeatInterval returns the heartbeat interval duration.
 func HeartbeatInterval() time.Duration {
-	return 100 * time.Millisecond
+	return 150 * time.Millisecond
 }
 
 // getLastLogIndex returns the index of the last log Entry.
