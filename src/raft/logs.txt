@@ -1,200 +1,121 @@
-karthikcottur@dhcp-10-8-004-195 raft %  go test -run TestFailNoAgree3B
-Test (3B): no agreement if too many followers disconnect ...
-2025/02/02 22:09:27 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:27 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 4, index1: -1, isLeader: false
-2025/02/02 22:09:28 Server 4 started election with Term 1
-2025/02/02 22:09:28 Got vote request at server 1 from 4
-2025/02/02 22:09:28 Got vote request at server 0 from 4
-2025/02/02 22:09:28 Enter request vote lock at server 0 from 4
-2025/02/02 22:09:28 Candidate has higher Term 4 at server 0
-2025/02/02 22:09:28 Candidate last log term: 0, candidate last log index: 0
-2025/02/02 22:09:28 last log term: 0, last log index: 0
-2025/02/02 22:09:28 Server 0 granted vote to candidate 4
-2025/02/02 22:09:28 Enter request vote lock at server 1 from 4
-2025/02/02 22:09:28 Candidate has higher Term 4 at server 1
-2025/02/02 22:09:28 Candidate last log term: 0, candidate last log index: 0
-2025/02/02 22:09:28 last log term: 0, last log index: 0
-2025/02/02 22:09:28 Server 1 granted vote to candidate 4
-2025/02/02 22:09:28 Got vote request at server 2 from 4
-2025/02/02 22:09:28 Enter request vote lock at server 2 from 4
-2025/02/02 22:09:28 Candidate has higher Term 4 at server 2
-2025/02/02 22:09:28 Candidate last log term: 0, candidate last log index: 0
-2025/02/02 22:09:28 last log term: 0, last log index: 0
-2025/02/02 22:09:28 Server 2 granted vote to candidate 4
-2025/02/02 22:09:28 Got vote request at server 3 from 4
-2025/02/02 22:09:28 Enter request vote lock at server 3 from 4
-2025/02/02 22:09:28 Candidate has higher Term 4 at server 3
-2025/02/02 22:09:28 Candidate last log term: 0, candidate last log index: 0
-2025/02/02 22:09:28 last log term: 0, last log index: 0
-2025/02/02 22:09:28 Server 3 granted vote to candidate 4
-2025/02/02 22:09:28 Server 4 became leader with Term 1
-2025/02/02 22:09:28 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:28 si: 3, index1: 1, isLeader: true
-2025/02/02 22:09:28 Leader 4 prepared Entries [{1 10}] for server 1
-2025/02/02 22:09:28 Leader 4 prepared Entries [{1 10}] for server 0
-2025/02/02 22:09:28 Leader 4 prepared Entries [{1 10}] for server 3
-2025/02/02 22:09:28 Leader 4 prepared Entries [{1 10}] for server 2
-2025/02/02 22:09:28 Appending log entries [{1 10}] at server 3 from 4
-2025/02/02 22:09:28 Appending log entries [{1 10}] at server 1 from 4
-2025/02/02 22:09:28 Appending log entries [{1 10}] at server 0 from 4
-2025/02/02 22:09:28 Appending log entries [{1 10}] at server 2 from 4
-2025/02/02 22:09:28 Log while Applying state at server: 4, [{0 <nil>} {1 10}]
-2025/02/02 22:09:28 lastApplied: 0, commitIndex: 1
-2025/02/02 22:09:28 Applying state at server: 4, command: 10, command index: 1
-2025/02/02 22:09:28 Log while Applying state at server: 2, [{0 <nil>} {1 10}]
-2025/02/02 22:09:28 lastApplied: 0, commitIndex: 1
-2025/02/02 22:09:28 Applying state at server: 2, command: 10, command index: 1
-2025/02/02 22:09:28 Log while Applying state at server: 3, [{0 <nil>} {1 10}]
-2025/02/02 22:09:28 lastApplied: 0, commitIndex: 1
-2025/02/02 22:09:28 Applying state at server: 3, command: 10, command index: 1
-2025/02/02 22:09:28 Log while Applying state at server: 0, [{0 <nil>} {1 10}]
-2025/02/02 22:09:28 lastApplied: 0, commitIndex: 1
-2025/02/02 22:09:28 Applying state at server: 0, command: 10, command index: 1
-2025/02/02 22:09:28 Log while Applying state at server: 1, [{0 <nil>} {1 10}]
-2025/02/02 22:09:28 lastApplied: 0, commitIndex: 1
-2025/02/02 22:09:28 Applying state at server: 1, command: 10, command index: 1
-2025/02/02 22:09:29 Leader 4 prepared Entries [{1 20}] for server 3
-2025/02/02 22:09:29 Leader 4 prepared Entries [{1 20}] for server 1
-2025/02/02 22:09:29 Leader 4 prepared Entries [{1 20}] for server 0
-2025/02/02 22:09:29 Leader 4 prepared Entries [{1 20}] for server 2
-2025/02/02 22:09:29 Appending log entries [{1 20}] at server 3 from 4
-2025/02/02 22:09:29 Server 0 started election with Term 2
-2025/02/02 22:09:30 Server 2 started election with Term 2
-2025/02/02 22:09:30 Server 1 started election with Term 2
-2025/02/02 22:09:30 Server 0 started election with Term 3
-2025/02/02 22:09:30 Server 1 started election with Term 3
-2025/02/02 22:09:30 Server 2 started election with Term 3
-2025/02/02 22:09:30 Server 0 started election with Term 4
-2025/02/02 22:09:31 Server 2 started election with Term 4
-2025/02/02 22:09:31 Server 0 started election with Term 5
-2025/02/02 22:09:31 Server 1 started election with Term 4
-2025/02/02 22:09:31 Server 1 started election with Term 5
-2025/02/02 22:09:31 Got vote request at server 3 from 1
-2025/02/02 22:09:31 Enter request vote lock at server 3 from 1
-2025/02/02 22:09:31 Candidate has higher Term 1 at server 3
-2025/02/02 22:09:31 Candidate last log term: 1, candidate last log index: 1
-2025/02/02 22:09:31 last log term: 1, last log index: 2
-2025/02/02 22:09:31 Got vote request at server 0 from 1
-2025/02/02 22:09:31 Enter request vote lock at server 0 from 1
-2025/02/02 22:09:31 Got vote request at server 2 from 1
-2025/02/02 22:09:31 Enter request vote lock at server 2 from 1
-2025/02/02 22:09:31 Candidate has higher Term 1 at server 2
-2025/02/02 22:09:31 Candidate last log term: 1, candidate last log index: 1
-2025/02/02 22:09:31 last log term: 1, last log index: 1
-2025/02/02 22:09:31 Server 2 granted vote to candidate 1
-2025/02/02 22:09:31 Got vote request at server 4 from 1
-2025/02/02 22:09:31 Enter request vote lock at server 4 from 1
-2025/02/02 22:09:31 Candidate last log term: 1, candidate last log index: 1
-2025/02/02 22:09:31 last log term: 1, last log index: 2
-2025/02/02 22:09:31 Server 0 started election with Term 6
-2025/02/02 22:09:31 Got vote request at server 3 from 0
-2025/02/02 22:09:31 Enter request vote lock at server 3 from 0
-2025/02/02 22:09:31 Candidate has higher Term 0 at server 3
-2025/02/02 22:09:31 Candidate last log term: 1, candidate last log index: 1
-2025/02/02 22:09:31 last log term: 1, last log index: 2
-2025/02/02 22:09:31 Got vote request at server 4 from 0
-2025/02/02 22:09:31 Enter request vote lock at server 4 from 0
-2025/02/02 22:09:31 Candidate has higher Term 0 at server 4
-2025/02/02 22:09:31 Candidate last log term: 1, candidate last log index: 1
-2025/02/02 22:09:31 last log term: 1, last log index: 2
-2025/02/02 22:09:31 Got vote request at server 1 from 0
-2025/02/02 22:09:31 Enter request vote lock at server 1 from 0
-2025/02/02 22:09:31 Candidate has higher Term 0 at server 1
-2025/02/02 22:09:31 Candidate last log term: 1, candidate last log index: 1
-2025/02/02 22:09:31 last log term: 1, last log index: 1
-2025/02/02 22:09:31 Server 1 granted vote to candidate 0
-2025/02/02 22:09:31 Got vote request at server 2 from 0
-2025/02/02 22:09:31 Enter request vote lock at server 2 from 0
-2025/02/02 22:09:31 Candidate has higher Term 0 at server 2
-2025/02/02 22:09:31 Candidate last log term: 1, candidate last log index: 1
-2025/02/02 22:09:31 last log term: 1, last log index: 1
-2025/02/02 22:09:31 Server 2 granted vote to candidate 0
-2025/02/02 22:09:31 Server 0 became leader with Term 6
-2025/02/02 22:09:31 si: 0, index1: -1, isLeader: false
-2025/02/02 22:09:31 si: 1, index1: -1, isLeader: false
-2025/02/02 22:09:31 si: 2, index1: -1, isLeader: false
-2025/02/02 22:09:31 si: 3, index1: -1, isLeader: false
-2025/02/02 22:09:31 Leader 0 prepared Entries [{6 30}] for server 3
-2025/02/02 22:09:31 Leader 0 prepared Entries [{6 30} {6 1000}] for server 2
-2025/02/02 22:09:31 Leader 0 prepared Entries [{6 30}] for server 4
-2025/02/02 22:09:31 si: 4, index1: 3, isLeader: true
-2025/02/02 22:09:31 Leader 0 prepared Entries [{6 30}] for server 1
-2025/02/02 22:09:31 Appending log entries [{6 30}] at server 3 from 0
-2025/02/02 22:09:31 Appending log entries [{6 30}] at server 4 from 0
-2025/02/02 22:09:31 Appending log entries [{6 30} {6 1000}] at server 2 from 0
-2025/02/02 22:09:31 Appending log entries [{6 30}] at server 1 from 0
-2025/02/02 22:09:31 Leader 0 prepared Entries [{6 30} {6 1000}] for server 3
-2025/02/02 22:09:31 Leader 0 prepared Entries [{6 30} {6 1000}] for server 1
-2025/02/02 22:09:31 Appending log entries [{6 30} {6 1000}] at server 3 from 0
-2025/02/02 22:09:31 Appending log entries [{6 30} {6 1000}] at server 1 from 0
-2025/02/02 22:09:31 Leader 0 prepared Entries [{6 30} {6 1000}] for server 4
-2025/02/02 22:09:31 Leader 0 prepared Entries [{6 30}] for server 2
-2025/02/02 22:09:31 Appending log entries [{6 30} {6 1000}] at server 4 from 0
-2025/02/02 22:09:31 Appending log entries [{6 30}] at server 2 from 0
-2025/02/02 22:09:32 Leader 4 could not contact server 2
-2025/02/02 22:09:32 Leader 4 prepared Entries [{1 20}] for server 2
-2025/02/02 22:09:32 Log while Applying state at server: 3, [{0 <nil>} {1 10} {1 20} {6 30} {6 30} {6 1000}]
-2025/02/02 22:09:32 lastApplied: 1, commitIndex: 2
-2025/02/02 22:09:32 Applying state at server: 3, command: 20, command index: 2
-2025/02/02 22:09:32 Log while Applying state at server: 2, [{0 <nil>} {1 10} {6 30} {6 1000} {6 30}]
-2025/02/02 22:09:32 lastApplied: 1, commitIndex: 2
-2025/02/02 22:09:32 Log while Applying state at server: 1, [{0 <nil>} {1 10} {6 30} {6 30} {6 1000}]
-2025/02/02 22:09:32 lastApplied: 1, commitIndex: 2
-2025/02/02 22:09:32 Applying state at server: 1, command: 30, command index: 2
-2025/02/02 22:09:32 Log while Applying state at server: 4, [{0 <nil>} {1 10} {1 20} {6 30} {6 30} {6 1000}]
-2025/02/02 22:09:32 lastApplied: 1, commitIndex: 2
-2025/02/02 22:09:32 Applying state at server: 4, command: 20, command index: 2
-2025/02/02 22:09:32 Applying state at server: 2, command: 30, command index: 2
-2025/02/02 22:09:32 Log while Applying state at server: 0, [{0 <nil>} {1 10} {6 30} {6 1000}]
-2025/02/02 22:09:32 lastApplied: 1, commitIndex: 2
-2025/02/02 22:09:32 Applying state at server: 0, command: 30, command index: 2
-2025/02/02 22:09:32 1: log map[1:10]; server map[1:10 2:20]
-2025/02/02 22:09:32 apply error: commit index=2 server=1 30 != server=3 20
+karthikcottur@dhcp-10-8-004-195 raft %  go test -run TestRejoin3B
+Test (3B): rejoin of partitioned leader ...
+2025/02/05 13:57:35 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 2, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 2, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 2, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 2, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 2, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 2, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 2, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:35 si: 2, index1: -1, isLeader: false
+2025/02/05 13:57:35 Server 0 started election with Term 1
+2025/02/05 13:57:35 Got vote request at server 1 from 0
+2025/02/05 13:57:35 Got vote request at server 2 from 0
+2025/02/05 13:57:35 Enter request vote lock at server 1 from 0
+2025/02/05 13:57:35 Candidate has higher Term 0 at server 1
+2025/02/05 13:57:35 Candidate last log term: 0, candidate last log index: 0
+2025/02/05 13:57:35 last log term: 0, last log index: 0
+2025/02/05 13:57:35 Server 1 granted vote to candidate 0
+2025/02/05 13:57:35 Enter request vote lock at server 2 from 0
+2025/02/05 13:57:35 Candidate has higher Term 0 at server 2
+2025/02/05 13:57:35 Candidate last log term: 0, candidate last log index: 0
+2025/02/05 13:57:35 last log term: 0, last log index: 0
+2025/02/05 13:57:35 Server 2 granted vote to candidate 0
+2025/02/05 13:57:35 Server 0 became leader with Term 1
+2025/02/05 13:57:36 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:36 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:36 si: 2, index1: 1, isLeader: true
+2025/02/05 13:57:36 Leader 0 prepared Entries [{1 101}] for server 1 with prevlogindex 0 and prevlogterm 0
+2025/02/05 13:57:36 Leader 0 prepared Entries [{1 101}] for server 2 with prevlogindex 0 and prevlogterm 0
+2025/02/05 13:57:36 Appending log entries [{1 101}] at server 1 from 0
+2025/02/05 13:57:36 Appending log entries [{1 101}] at server 2 from 0
+2025/02/05 13:57:36 Got successful reply at server 0 from 1
+2025/02/05 13:57:36 Got successful reply at server 0 from 2
+2025/02/05 13:57:36 Log while Applying state at server: 1, [{0 <nil>} {1 101}]
+2025/02/05 13:57:36 lastApplied: 0, commitIndex: 1
+2025/02/05 13:57:36 Applying state at server: 1, command: 101, command index: 1
+2025/02/05 13:57:36 Log while Applying state at server: 0, [{0 <nil>} {1 101}]
+2025/02/05 13:57:36 lastApplied: 0, commitIndex: 1
+2025/02/05 13:57:36 Applying state at server: 0, command: 101, command index: 1
+2025/02/05 13:57:36 Log while Applying state at server: 2, [{0 <nil>} {1 101}]
+2025/02/05 13:57:36 lastApplied: 0, commitIndex: 1
+2025/02/05 13:57:36 Applying state at server: 2, command: 101, command index: 1
+2025/02/05 13:57:37 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:37 Leader 0 prepared Entries [{1 102}] for server 2 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 Leader 0 prepared Entries [{1 102} {1 103} {1 104}] for server 2 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 Leader 0 prepared Entries [{1 102} {1 103} {1 104}] for server 1 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 Leader 0 prepared Entries [{1 102} {1 103}] for server 2 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 Leader 0 prepared Entries [{1 102} {1 103}] for server 1 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 Leader 0 prepared Entries [{1 102}] for server 1 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 1, index1: -1, isLeader: false
+2025/02/05 13:57:37 Leader 0 could not contact server 2
+2025/02/05 13:57:37 Leader 0 prepared Entries [{1 102} {1 103} {1 104}] for server 2 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 Server 2 started election with Term 2
+2025/02/05 13:57:37 Got vote request at server 1 from 2
+2025/02/05 13:57:37 Enter request vote lock at server 1 from 2
+2025/02/05 13:57:37 Candidate has higher Term 2 at server 1
+2025/02/05 13:57:37 Candidate last log term: 1, candidate last log index: 1
+2025/02/05 13:57:37 last log term: 1, last log index: 1
+2025/02/05 13:57:37 Server 1 granted vote to candidate 2
+2025/02/05 13:57:37 Server 2 became leader with Term 2
+2025/02/05 13:57:37 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:37 si: 1, index1: 2, isLeader: true
+2025/02/05 13:57:37 Leader 2 prepared Entries [{2 103}] for server 1 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 Leader 2 prepared Entries [{2 103}] for server 0 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:37 Appending log entries [{2 103}] at server 1 from 2
+2025/02/05 13:57:37 Got successful reply at server 2 from 1
+2025/02/05 13:57:37 Log while Applying state at server: 2, [{0 <nil>} {1 101} {2 103}]
+2025/02/05 13:57:37 lastApplied: 1, commitIndex: 2
+2025/02/05 13:57:37 Applying state at server: 2, command: 103, command index: 2
+2025/02/05 13:57:38 Log while Applying state at server: 1, [{0 <nil>} {1 101} {2 103}]
+2025/02/05 13:57:38 lastApplied: 1, commitIndex: 2
+2025/02/05 13:57:38 Applying state at server: 1, command: 103, command index: 2
+2025/02/05 13:57:39 si: 0, index1: -1, isLeader: false
+2025/02/05 13:57:39 si: 2, index1: 5, isLeader: true
+2025/02/05 13:57:39 Leader 0 prepared Entries [{1 102} {1 103} {1 104} {1 104}] for server 1 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:39 Leader 0 prepared Entries [{1 102} {1 103} {1 104} {1 104}] for server 2 with prevlogindex 1 and prevlogterm 1
+2025/02/05 13:57:39 Server 1 started election with Term 3
+2025/02/05 13:57:39 Got vote request at server 0 from 1
+2025/02/05 13:57:39 Enter request vote lock at server 0 from 1
+2025/02/05 13:57:39 Candidate has higher Term 1 at server 0
+2025/02/05 13:57:39 Candidate last log term: 2, candidate last log index: 2
+2025/02/05 13:57:39 last log term: 1, last log index: 5
+2025/02/05 13:57:39 Server 0 granted vote to candidate 1
+2025/02/05 13:57:39 Server 1 became leader with Term 3
+2025/02/05 13:57:39 Log while Applying state at server: 0, [{0 <nil>} {1 101} {1 102} {1 103} {1 104} {1 104}]
+2025/02/05 13:57:39 lastApplied: 1, commitIndex: 2
+2025/02/05 13:57:39 Applying state at server: 0, command: 102, command index: 2
+2025/02/05 13:57:39 0: log map[1:101]; server map[1:101 2:103]
+2025/02/05 13:57:39 0: log map[1:101]; server map[1:101 2:103]
+2025/02/05 13:57:39 apply error: commit index=2 server=0 102 != server=2 103
 exit status 1
-FAIL	6.5840/raft	5.182s
+FAIL	6.5840/raft	4.191s
 karthikcottur@dhcp-10-8-004-195 raft %

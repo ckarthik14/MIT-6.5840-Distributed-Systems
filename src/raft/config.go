@@ -569,7 +569,6 @@ func (cfg *config) one(cmd interface{}, expectedServers int, retry bool) int {
 			cfg.mu.Unlock()
 			if rf != nil {
 				index1, _, ok := rf.Start(cmd)
-				DPrintf("si: %d, index1: %d, isLeader: %v", si, index1, ok)
 				if ok {
 					index = index1
 					break
