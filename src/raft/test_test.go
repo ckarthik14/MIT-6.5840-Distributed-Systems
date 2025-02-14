@@ -798,7 +798,7 @@ func TestPersist33C(t *testing.T) {
 // iteration asks a leader, if there is one, to insert a command in the Raft
 // log.  If there is a leader, that leader will fail quickly with a high
 // probability (perhaps without committing the command), or crash after a while
-// with low probability (most likey committing the command).  If the number of
+// with low probability (most likely committing the command).  If the number of
 // alive servers isn't enough to form a majority, perhaps start a new server.
 // The leader in a new Term may try to finish replicating log entries that
 // haven't been committed yet.
@@ -894,7 +894,9 @@ func TestFigure8Unreliable3C(t *testing.T) {
 
 	cfg.begin("Test (3C): Figure 8 (unreliable)")
 
-	cfg.one(rand.Int()%10000, 1, true)
+	// Extracting random value for first operation
+	firstVal := rand.Int() % 10000
+	cfg.one(firstVal, 1, true)
 
 	nup := servers
 	for iters := 0; iters < 1000; iters++ {
@@ -903,16 +905,20 @@ func TestFigure8Unreliable3C(t *testing.T) {
 		}
 		leader := -1
 		for i := 0; i < servers; i++ {
-			_, _, ok := cfg.rafts[i].Start(rand.Int() % 10000)
+			cmd := rand.Int() % 10000
+			_, _, ok := cfg.rafts[i].Start(cmd)
 			if ok && cfg.connected[i] {
 				leader = i
+				//fmt.Printf("Server %d started command: %d\n", i, cmd)
 			}
 		}
 
 		if (rand.Int() % 1000) < 100 {
+			// 10% of the time
 			ms := rand.Int63() % (int64(RaftElectionTimeout/time.Millisecond) / 2)
 			time.Sleep(time.Duration(ms) * time.Millisecond)
 		} else {
+			// 90% of the time
 			ms := (rand.Int63() % 13)
 			time.Sleep(time.Duration(ms) * time.Millisecond)
 		}
@@ -937,7 +943,19 @@ func TestFigure8Unreliable3C(t *testing.T) {
 		}
 	}
 
-	cfg.one(rand.Int()%10000, servers, true)
+	for i := 0; i < servers; i++ {
+		//fmt.Printf("State of server: %d\n\n", i)
+		//fmt.Printf("log: %v\n", cfg.rafts[i].log)
+		//fmt.Printf("currentTerm: %d\n", cfg.rafts[i].currentTerm)
+		//fmt.Printf("votedFor: %d\n", cfg.rafts[i].votedFor)
+		//fmt.Printf("commitIndex: %d\n", cfg.rafts[i].commitIndex)
+		//fmt.Printf("lastApplied: %d\n", cfg.rafts[i].lastApplied)
+		//fmt.Printf("\n")
+	}
+
+	// Extracting random value for final operation
+	finalVal := rand.Int() % 10000
+	cfg.one(finalVal, servers, true)
 
 	cfg.end()
 }
@@ -1267,4 +1285,8 @@ func TestSnapshotInit3D(t *testing.T) {
 	// do another op to trigger potential bug
 	cfg.one(rand.Int(), servers, true)
 	cfg.end()
+}
+
+func TestPrettify(t *testing.T) {
+	prettify()
 }
