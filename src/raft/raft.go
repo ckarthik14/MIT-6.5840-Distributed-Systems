@@ -67,6 +67,7 @@ type Raft struct {
 	// from first approach
 	state status
 
+	// persistent
 	currentTerm int
 	votedFor    int
 	log         []LogEntry
@@ -76,6 +77,9 @@ type Raft struct {
 
 	nextIndex  []int
 	matchIndex []int
+
+	// last seen leader for this raft
+	lastSeenLeader int
 
 	// Additional timers/tracking
 	electionTimeout time.Duration
@@ -98,6 +102,13 @@ func (rf *Raft) GetState() (int, bool) {
 	term := rf.currentTerm
 	isLeader := (rf.state == LEADER)
 	return term, isLeader
+}
+
+func (rf *Raft) LastSeenLeader() int {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
+	return rf.lastSeenLeader
 }
 
 // ---------------------------------------------------------------
@@ -141,6 +152,7 @@ func (rf *Raft) readPersist(data []byte) {
 
 func (rf *Raft) Snapshot(index int, snapshot []byte) {
 	// 3D: your code here
+
 }
 
 // ---------------------------------------------------------------
@@ -152,7 +164,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	defer rf.mu.Unlock()
 
 	term := rf.currentTerm
-	isLeader := (rf.state == LEADER)
+	isLeader := rf.state == LEADER
 	if !isLeader {
 		return -1, term, false
 	}
@@ -167,9 +179,6 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	return index, term, true
 }
 
-// ---------------------------------------------------------------
-// Helper to get last log index & term
-// ---------------------------------------------------------------
 func (rf *Raft) getLastLogIndex() int {
 	return len(rf.log) - 1
 }
@@ -333,6 +342,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	// Signal we got heartbeat from valid leader
 	rf.sendToChannel(rf.heartbeatCh, true)
+	rf.lastSeenLeader = args.LeaderId
 
 	reply.Term = rf.currentTerm
 	reply.Success = false
@@ -633,7 +643,7 @@ func (rf *Raft) convertToLeader() {
 	rf.broadcastAppendEntries()
 }
 
-// Utility for channel-sends
+// Utility for non-blocking channel-sends
 func (rf *Raft) sendToChannel(ch chan bool, value bool) {
 	select {
 	case ch <- value:
@@ -695,7 +705,8 @@ func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan 
 	rf.votesReceived = 0
 	rf.electionTimeout = rf.electionTimeoutDuration()
 
-	// second approach's channels
+	rf.lastSeenLeader = 0
+
 	rf.resetChannels()
 
 	// initialize from persisted state

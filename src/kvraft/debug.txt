@@ -1,0 +1,58 @@
+Server 0 started
+Server 1 started
+Server 2 started
+Server 3 started
+Server 4 started
+Test: one client (4A) ...
+Making a Put call from client 5174256574889843753 to server 0 with key: 0, val: , seqnum: 1
+Server 0 is not leader 
+Making a GET call from client 5174256574889843753 to server 0 with key: 0, seqnum: 2
+Server 0 is not leader 
+Making a Append call from client 5174256574889843753 to server 0 with key: 0, val: x 0 0 y, seqnum: 3
+Server 0 is not leader 
+Making a Append call from client 5174256574889843753 to server 0 with key: 0, val: x 0 1 y, seqnum: 4
+Server 0 is not leader 
+Making a GET call from client 5174256574889843753 to server 0 with key: 0, seqnum: 5
+Server 0 is not leader 
+000408 S1 TIMR Election timeout reached, starting election
+000408 S1 ELEC Starting election for term 1
+000408 S4 VOTE Received vote request from S1 for term 1
+000408 S4 TERM Updated term to 1 due to vote request from S1
+000408 S4 VOTE Granted vote to S1 for term 1
+000408 S3 VOTE Received vote request from S1 for term 1
+000408 S3 TERM Updated term to 1 due to vote request from S1
+000408 S3 VOTE Granted vote to S1 for term 1
+000408 S2 VOTE Received vote request from S1 for term 1
+000408 S2 TERM Updated term to 1 due to vote request from S1
+000408 S2 VOTE Granted vote to S1 for term 1
+000408 S0 VOTE Received vote request from S1 for term 1
+000408 S1 ELEC Server 1 became leader with Term 1
+000408 S0 TERM Updated term to 1 due to vote request from S1
+000408 S0 VOTE Granted vote to S1 for term 1
+Making a GET call from client 1834218697283509028 to server 0 with key: 0, seqnum: 1
+005002 S1 LOG1 Log after appending in master [{0 <nil>} {1 {0 0  1834218697283509028 1}}]
+005006 S0 LOG1 Received 1 entries from leader S1
+005006 S0 LOG1 Appending 1 new entries starting at index 1
+005006 S0 LOG1 Log after appending in follower [{0 <nil>} {1 {0 0  1834218697283509028 1}}]
+005006 S2 LOG1 Received 1 entries from leader S1
+005006 S2 LOG1 Appending 1 new entries starting at index 1
+005006 S2 LOG1 Log after appending in follower [{0 <nil>} {1 {0 0  1834218697283509028 1}}]
+005006 S3 LOG1 Received 1 entries from leader S1
+005006 S3 LOG1 Appending 1 new entries starting at index 1
+005006 S3 LOG1 Log after appending in follower [{0 <nil>} {1 {0 0  1834218697283509028 1}}]
+005006 S4 LOG1 Received 1 entries from leader S1
+005006 S4 LOG1 Appending 1 new entries starting at index 1
+005006 S4 LOG1 Log after appending in follower [{0 <nil>} {1 {0 0  1834218697283509028 1}}]
+005006 S1 CMIT Committed index 1 (majority reached)
+005006 S1 LOG2 Applying command at index 1
+kvserver: applyState msg: {true {0 0  1834218697283509028 1} 1 false [] 0 0}
+--- FAIL: TestBasic4A (5.01s)
+    test_test.go:293: get wrong value, key 0, wanted:
+        x 0 0 yx 0 1 y
+        , got
+        
+    test_test.go:126: failure
+    test_test.go:144: 0 missing element x 0 0 y in Append result 
+FAIL
+exit status 1
+FAIL	6.5840/kvraft	5.184s

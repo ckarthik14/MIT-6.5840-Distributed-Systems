@@ -63,7 +63,7 @@ func getVerbosity() int {
 
 // DPrintf logs debug messages with server ID, topic, and formatted content when DEBUG is enabled.
 func DPrintf(serverID int, topic logTopic, format string, a ...interface{}) {
-	if !DEBUG || !(topic == dLog || topic == dElect) {
+	if !DEBUG || topic == dLeader {
 		return
 	}
 
